@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     tar \
     cmake \
-    zlib1g \ 
-    bzip2 \
+    zlib1g-dev \ 
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    libncurses5-dev \
     liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,6 +30,30 @@ RUN mkdir -p ${SOFT}/libdeflate-${LIBDEFLATE_VERSION} && \
     rm -rf v${LIBDEFLATE_VERSION}.tar.gz build
 
 ENV PATH=${SOFT}/libdeflate-${LIBDEFLATE_VERSION}/bin:${PATH}
+ENV LIBDEFLATE=$SOFT/libdeflate-${LIBDEFLATE_VERSION}/bin/libdeflate-gzip
 
-# Install samtools
+# Install htslib v1.22 (release: 2025-05-30)
+ENV HTSLIB_VERSION=1.22
+RUN mkdir -p $SOFT/htslib-${HTSLIB_VERSION} && \
+    cd $SOFT/htslib-${HTSLIB_VERSION} && \
+    wget https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 && \
+    tar -xjf htslib-${HTSLIB_VERSION}.tar.bz2 --strip-components=1 && \
+    ./configure --prefix=$SOFT/htslib-${HTSLIB_VERSION} && \
+    make -j$(nproc) && make install && \
+    rm -rf htslib-${HTSLIB_VERSION}.tar.bz2
 
+ENV PATH=$SOFT/htslib-${HTSLIB_VERSION}/bin:$PATH
+ENV HTSLIB=$SOFT/htslib-${HTSLIB_VERSION}/bin/htsfile
+
+# Install samtools v1.22 (release: 2025-05-30)
+ENV SAMTOOLS_VERSION=1.22
+RUN mkdir -p $SOFT/samtools-${SAMTOOLS_VERSION} && \
+    cd $SOFT/samtools-${SAMTOOLS_VERSION} && \
+    wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2 && \
+    tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2 --strip-components=1 && \
+    ./configure --prefix=$SOFT/samtools-${SAMTOOLS_VERSION} --with-htslib=$SOFT/htslib-${HTSLIB_VERSION} && \
+    make -j$(nproc) && make install && \
+    rm -rf samtools-${SAMTOOLS_VERSION}.tar.bz2
+
+ENV PATH=$SOFT/samtools-${SAMTOOLS_VERSION}/bin:$PATH
+ENV SAMTOOLS=$SOFT/samtools-${SAMTOOLS_VERSION}/bin/samtools
