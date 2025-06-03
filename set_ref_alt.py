@@ -96,7 +96,7 @@ def main():
         # Поиск референсного аллеля в fasta файле
         chroms = input_df["#CHROM"].unique()
         for chrom in chroms:
-            genome_path = f"sepChrs/{chrom}.fa"
+            genome_path = f"/ref/GRCh38.d1.vd1_mainChr/sepChrs/{chrom}.fa"
             fa = pysam.FastaFile(genome_path)
 
             chrom_idx = input_df.loc[input_df['#CHROM'] == chrom].index
