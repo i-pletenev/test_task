@@ -1,20 +1,31 @@
 FROM ubuntu:20.04
 
 # Install dependencies
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
-    curl \
-    tar \
-    cmake \
-    pkg-config \
-    zlib1g-dev \ 
-    libbz2-dev \
-    libcurl4-openssl-dev \
-    libncurses5-dev \
-    liblzma-dev \
-    && rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1
+
+RUN apt update && \
+    apt install -y --no-install-recommends \
+        build-essential \
+        wget \
+    	curl \
+    	tar \
+    	cmake \
+    	pkg-config \
+    	zlib1g-dev \ 
+    	libbz2-dev \
+    	libcurl4-openssl-dev \
+    	libncurses5-dev \
+    	liblzma-dev \
+    	python3 \
+    	python3-pip \
+    	python3-setuptools \
+    	python3-dev \
+    	ca-certificates && \
+    pip3 install --no-cache-dir \
+	pandas pysam && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV SOFT=/soft
 RUN mkdir -p ${SOFT} && chmod -R 755 ${SOFT}
@@ -85,3 +96,8 @@ RUN mkdir -p $SOFT/vcftools-${VCFTOOLS_VERSION} && \
 
 ENV PATH=$SOFT/vcftools-${VCFTOOLS_VERSION}/bin:$PATH
 ENV VCFTOOLS=$SOFT/vcftools-${VCFTOOLS_VERSION}/bin/vcftools
+
+
+# Add python script
+COPY set_ref_alt.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/set_ref_alt.py
